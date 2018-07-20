@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { ObjectID } = require('mongodb')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -7,6 +8,10 @@ const { User } = require('./models/users')
 const app = express()
 
 app.use(bodyParser.json())
+app.use((reqs, resp, next) => {
+    console.log(reqs.params)
+    next()
+})
 app.get('/todos/:id', (reqs, resp) => {
     if (!ObjectID.isValid(reqs.params.id))
         return resp.status(400).send('Bad data request')
@@ -36,6 +41,22 @@ app.post('/todos', (request, response) => {
         response.status(400).send(err)
     })
 })
+//best practice for patch's body: {"op": "replace", "path": /model'sPropertyName, "value": ...}
+app.patch('/todos/:id', (reqs, resp) => {
+    debugger;
+    if (!ObjectID.isValid(reqs.params.id))
+        return resp.status(400).send('Bad data request')
+    Todo.findByIdAndUpdate(reqs.params.id, 
+                    {$set: {[reqs.body.path.replace('/', '')]: reqs.body.value}},
+                    {new: true})
+        .then((todo) => {
+            if (!todo)
+                return resp.status(404).send('Todos dosnt exist') 
+            resp.status(200).json(todo)
+        }, e => resp.status(500).send('Internal server error'))
+    }
+    
+)
 app.delete('/todos/:id', (reqs, resp) => {
 
     if (!ObjectID.isValid(reqs.params.id))

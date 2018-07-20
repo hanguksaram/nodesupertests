@@ -132,3 +132,56 @@ describe('removing single todo', () => {
                     })         
     
 })
+describe('patching todo', () => {
+    it('should change text', (done) => {
+        request(app)
+            .patch('/todos/' + id)
+            .send({"op": "replace", "path": "/text", "value": 'text changed'})
+            .expect(200)
+            .expect((resp) => {
+                expect(resp.body.text).toBe('text changed')
+            })
+            .end((err, resp) => {
+                if (err) 
+                    return done(err)
+                Todo.findById(id).then((todo) => {
+                    expect(todo.text).toBe('text changed')
+                    done()
+                }).catch((e) => done(e))
+            })
+            
+    })
+    it('should change completed', (done) => {
+        request(app)
+            .patch('/todos/' + id)
+            .send({"op": "replace", "path": "/completed", "value": false})
+            .expect(200)
+            .expect((resp) => {
+                expect(resp.body.completed).toBe(false)
+            })
+            .end((err, resp) => {
+                if (err) 
+                    return done(err)
+                Todo.findById(id).then((todo) => {
+                    expect(todo.completed).toBe(false)
+                    done()
+                }).catch((e) => done(e))
+            })
+            
+    })
+    it('should not patch todo which dosnt exist, send 404', (done) => {
+        request(app)
+            .patch('/todos/' + new ObjectID(2))
+            .send({"op": "replace", "path": "/completed", "value": false})
+            .expect(404)
+            .end(done)
+            })
+    it('should not patch todo due to bad data in request params, send 400', (done) => {
+                request(app)
+                .patch('/todos/' + 'lorumipsum')
+                .send({"op": "replace", "path": "/completed", "value": false})
+                    .end(done)
+                    })          
+    
+})
+//{"op": "replace", "path": /model'sPropertyName, "value": ...}
