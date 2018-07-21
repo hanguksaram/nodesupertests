@@ -1,3 +1,4 @@
+require('./config')
 const _ = require('lodash')
 const { ObjectID } = require('mongodb')
 const express = require('express')
@@ -70,7 +71,7 @@ app.delete('/todos/:id', (reqs, resp) => {
         (e) => resp.status(500).send('Internal server error')
         )
 })
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
     console.log('Started on port 3000')
 })
 // const hbs = require('hbs')
